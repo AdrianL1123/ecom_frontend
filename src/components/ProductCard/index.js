@@ -5,14 +5,70 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Chip, Grid, Container } from "@mui/material";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { deleteProduct } from "../../utils/api_products";
+import { useSnackbar } from "notistack";
+import { addToCart } from "../../utils/api_cart";
+
 export default function ProductsCard(props) {
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+
   const { rows = [] } = props;
+
+  const deleteProductMutation = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      // display success message
+      enqueueSnackbar("Product has been successfully deleted", {
+        variant: "success",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
+      // cheating method
+      // windows.location = "/";
+    },
+    onError: (error) => {
+      // display error message
+      enqueueSnackbar(error.response.data.message, {
+        variant: "error",
+      });
+    },
+  });
+
+  const handleCartSubmit = (row) => {
+    // console.log(row);
+    addToCartMutation.mutate(row);
+  };
+  const addToCartMutation = useMutation({
+    mutationFn: addToCart,
+    onSuccess: () => {
+      // display success message
+      enqueueSnackbar("Product has been added to cart successfully.", {
+        variant: "success",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["carts"],
+      });
+    },
+    onError: (error) => {
+      // display error message
+      enqueueSnackbar(error.response.data.message, {
+        variant: "error",
+      });
+    },
+  });
+
   return (
     <>
       <Container maxWidth="xl">
         <Grid container spacing={2}>
           {rows.map((row) => (
-            <Grid item lg={4} md={6} xs={12}>
+            <Grid key={row._id} item lg={4} md={6} xs={12}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -27,14 +83,14 @@ export default function ProductsCard(props) {
                   >
                     <Chip
                       size="small"
-                      color="info"
+                      style={{ backgroundColor: "#EBFBEE", color: "#6ACF7E" }}
                       sx={{ padding: "5px" }}
-                      label={`MYR ${row.price}`}
+                      label={`$ ${row.price}`}
                     ></Chip>
                     <Chip
                       sx={{ padding: "5px" }}
                       size="small"
-                      color="warning"
+                      style={{ backgroundColor: "#FFF4E6", color: "#FD882B" }}
                       label={row.category}
                     ></Chip>
                   </CardActions>
@@ -44,6 +100,7 @@ export default function ProductsCard(props) {
                       variant="contained"
                       color="primary"
                       fullWidth
+                      onClick={() => handleCartSubmit(row)}
                     >
                       Add to cart
                     </Button>
@@ -55,10 +112,30 @@ export default function ProductsCard(props) {
                       paddingTop: "20px",
                     }}
                   >
-                    <Button size="small" variant="contained" color="primary">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      style={{ borderRadius: "17px" }}
+                      onClick={() => {
+                        navigate("/products/" + row._id);
+                      }}
+                    >
                       Edit
                     </Button>
-                    <Button size="small" variant="contained" color="error">
+                    <Button
+                      variant="contained"
+                      color="error"
+                      style={{ borderRadius: "17px" }}
+                      onClick={() => {
+                        const confirm = window.confirm(
+                          "Are you sure you want to delete this product ?"
+                        );
+                        if (confirm) {
+                          deleteProductMutation.mutate(row._id);
+                        } else {
+                        }
+                      }}
+                    >
                       Delete
                     </Button>
                   </CardActions>
@@ -66,6 +143,13 @@ export default function ProductsCard(props) {
               </Card>
             </Grid>
           ))}
+          {rows.length === 0 ? (
+            <Grid items xs={12}>
+              <Typography align="center" sx={{ padding: "10px 0" }}>
+                No Items found.
+              </Typography>
+            </Grid>
+          ) : null}
         </Grid>
       </Container>
     </>
