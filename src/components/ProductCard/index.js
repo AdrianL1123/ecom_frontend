@@ -51,8 +51,9 @@ export default function ProductsCard(props) {
       enqueueSnackbar("Product has been added to cart successfully.", {
         variant: "success",
       });
+      //* reset the card data
       queryClient.invalidateQueries({
-        queryKey: ["carts"],
+        queryKey: ["cart"],
       });
     },
     onError: (error) => {

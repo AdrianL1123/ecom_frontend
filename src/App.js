@@ -4,7 +4,9 @@ import { SnackbarProvider, useSnackbar } from "notistack";
 import Products from "./pages/Products";
 import ProductsAddNew from "./pages/ProductsAddNew";
 import ProductsEdit from "./pages/ProductsEdit";
+import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
+import Orders from "./pages/Order";
 const queryClient = new QueryClient();
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
             <Route path="/add" element={<ProductsAddNew />} />
             <Route path="/products/:id" element={<ProductsEdit />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/orders" element={<Orders />} />
           </Routes>
         </BrowserRouter>
       </SnackbarProvider>

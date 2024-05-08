@@ -53,16 +53,6 @@ export default function Products() {
           >
             Add New
           </Button>
-          <Button
-            variant="contained"
-            color="info"
-            textAlign="start"
-            onClick={() => {
-              navigate("/cart");
-            }}
-          >
-            View Cart
-          </Button>
         </Container>
         <Container maxWidth="xl">
           <FormControl sx={{ width: "150px", mb: 2 }}>

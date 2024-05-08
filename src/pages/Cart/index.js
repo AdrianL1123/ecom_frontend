@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
-
 import {
   Table,
   TableCell,
@@ -15,14 +14,17 @@ import {
   Box,
   Typography,
 } from "@mui/material";
+
 import { displayCart, removeItemFromCart } from "../../utils/api_cart";
+import Header from "../../components/Header";
+
 export default function Cart() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
   const { data: carts = [] } = useQuery({
-    queryKey: ["carts"],
+    queryKey: ["cart"],
     queryFn: () => displayCart(),
   });
   console.log(carts);
@@ -43,7 +45,7 @@ export default function Cart() {
         variant: "success",
       });
       queryClient.invalidateQueries({
-        queryKey: ["carts"],
+        queryKey: ["cart"],
       });
       // cheating method
       // windows.location = "/";
@@ -56,28 +58,18 @@ export default function Cart() {
     },
   });
 
+  const handleRemoveFromCart = (_id) => {
+    const answer = window.confirm(
+      "Are you sure you want to remove this product from your cart ?"
+    );
+    if (answer) {
+      deleteCartItemMutation.mutate(_id);
+    }
+  };
+
   return (
-    <Container
-      style={{
-        maxWidth: "700px",
-        paddingTop: "20px",
-      }}
-    >
-      <Box align="center">
-        <h1 className="h1">Cart</h1>
-      </Box>
-
-      <Container align="center">
-        <Button
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          Home
-        </Button>
-        <Button variant="disabled">Cart</Button>
-      </Container>
-
+    <Container style={{ maxWidth: "700px", paddingTop: "20px" }}>
+      <Header />
       <Container>
         <TableContainer
           component={Paper}
@@ -88,7 +80,7 @@ export default function Cart() {
               <TableRow>
                 <TableCell align="center">Product</TableCell>
                 <TableCell>Price</TableCell>
-                <TableCell align="center">Quatity</TableCell>
+                <TableCell align="center">Quantity</TableCell>
                 <TableCell>Total</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
@@ -98,20 +90,16 @@ export default function Cart() {
                 {carts.map((cart) => (
                   <TableRow key={cart._id}>
                     <TableCell align="center">{cart.name}</TableCell>
-                    <TableCell align="center">{cart.price}</TableCell>
+                    <TableCell align="center">${cart.price}</TableCell>
                     <TableCell align="center">{cart.quantity}</TableCell>
-                    <TableCell>{cart.price * cart.quantity}</TableCell>
+                    <TableCell>
+                      ${(cart.price * cart.quantity).toFixed(2)}
+                    </TableCell>
                     <TableCell align="center">
                       <Button
                         color="error"
                         onClick={() => {
-                          const answer = window.confirm(
-                            "Are you sure you want to remove this product from your cart ?"
-                          );
-                          if (answer) {
-                            deleteCartItemMutation.mutate(cart._id);
-                          } else {
-                          }
+                          handleRemoveFromCart(cart._id);
                         }}
                       >
                         Remove
@@ -120,28 +108,39 @@ export default function Cart() {
                   </TableRow>
                 ))}
                 <TableRow>
-                  <TableCell align="center">{}</TableCell>
-                  <TableCell align="center">{}</TableCell>
-                  <TableCell align="center">{}</TableCell>
+                  <TableCell colSpan={3} align="right">
+                    <Typography variant="h6">Total:</Typography>
+                  </TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>
-                    ${totalInCart()}
+                    ${totalInCart().toFixed(2)}
                   </TableCell>
                   <TableCell align="center"></TableCell>
                 </TableRow>
               </TableBody>
             ) : (
-              <TableRow>
-                <Typography variant="h6">
-                  No items added to cart yet.
-                </Typography>
-              </TableRow>
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Typography variant="h6">
+                      No items added to cart yet.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
             )}
           </Table>
         </TableContainer>
+        <Box align="center" sx={{ paddingTop: "20px" }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              navigate("/checkout");
+            }}
+          >
+            Checkout
+          </Button>
+        </Box>
       </Container>
-      <Box align="center" sx={{ paddingTop: "20px" }}>
-        <Button variant="contained">Checkout</Button>
-      </Box>
     </Container>
   );
 }
