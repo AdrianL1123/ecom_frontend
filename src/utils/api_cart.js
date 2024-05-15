@@ -19,3 +19,7 @@ export function removeItemFromCart(_id) {
   let newCarts = carts.filter((item) => item._id !== _id);
   localStorage.setItem("cart", JSON.stringify(newCarts));
 }
+
+export function emptyCart() {
+  localStorage.removeItem("cart");
+}

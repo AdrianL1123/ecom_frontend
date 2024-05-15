@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import {
@@ -11,15 +10,11 @@ import {
   TableBody,
   Container,
   Button,
-  Box,
   Typography,
-  FormControl,
-  InputLabel,
   Select,
   MenuItem,
 } from "@mui/material";
 import { getOrders, deleteOrder, updateOrder } from "../../utils/api_orders";
-import { displayCart } from "../../utils/api_cart";
 import Header from "../../components/Header";
 
 export default function Orders() {
@@ -41,8 +36,6 @@ export default function Orders() {
       queryClient.invalidateQueries({
         queryKey: ["order"],
       });
-      // cheating method
-      // windows.location = "/";
     },
     onError: (error) => {
       // display error message
@@ -147,10 +140,11 @@ export default function Orders() {
                       </Select>
                     </TableCell>
 
-                    <TableCell>Date</TableCell>
+                    <TableCell>{order.paid_at}</TableCell>
                     <TableCell align="right">
-                      {order.status === "paid" && (
+                      {order.status === "pending" && (
                         <Button
+                          variant="outlined"
                           color="error"
                           onClick={() => {
                             handleRemoveOrder(order._id);

@@ -13,6 +13,7 @@ import {
   TextField,
 } from "@mui/material";
 import { getProduct, updateProduct } from "../../utils/api_products";
+import { uploadImage } from "../../utils/api_images";
 
 export default function ProductsEdit() {
   const { id } = useParams();
@@ -22,6 +23,7 @@ export default function ProductsEdit() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [image, setImage] = useState("");
 
   // get data from product api: /products/:id
   const {
@@ -41,6 +43,7 @@ export default function ProductsEdit() {
       setDescription(row.description);
       setPrice(row.price);
       setCategory(row.category);
+      setImage(row.image ? row.image : "");
     }
   }, [row]);
 
@@ -70,9 +73,27 @@ export default function ProductsEdit() {
       description: description,
       price: price,
       category: category,
+      image: image,
     });
   };
 
+  // upload image mutation
+  const uploadImageMutation = useMutation({
+    mutationFn: uploadImage,
+    onSuccess: (data) => {
+      setImage(data.image_url);
+    },
+    onError: (error) => {
+      // display error message
+      enqueueSnackbar(error.response.data.message, {
+        variant: "error",
+      });
+    },
+  });
+
+  const handleImageUpload = (event) => {
+    uploadImageMutation.mutate(event.target.files[0]);
+  };
   // if API data haven't return yet
   if (isLoading) {
     return <Container>Loading...</Container>;
@@ -135,6 +156,26 @@ export default function ProductsEdit() {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               />
+            </Grid>
+            <Grid item xs={12}>
+              {image !== "" ? (
+                <>
+                  <div>
+                    <img
+                      src={"http://localhost:8888/" + image}
+                      width="300px"
+                      height="300px"
+                    />
+                  </div>
+                  <Button onClick={() => setImage("")}>Remove Image</Button>
+                </>
+              ) : (
+                <input
+                  type="file"
+                  multiple={false}
+                  onChange={handleImageUpload}
+                />
+              )}
             </Grid>
             <Grid item xs={12}>
               <Button variant="contained" fullWidth onClick={handleFormSubmit}>

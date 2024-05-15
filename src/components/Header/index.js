@@ -13,6 +13,10 @@ export default function Header() {
     pageTitle = "Checkout";
   } else if (location.pathname === "/orders") {
     pageTitle = "My Orders";
+  } else if (location.pathname === "/login") {
+    pageTitle = "Login to Your Account";
+  } else if (location.pathname === "/signup") {
+    pageTitle = "Create a New Account";
   }
 
   return (
@@ -57,6 +61,20 @@ export default function Header() {
           }}
         >
           My Orders
+        </Button>
+        <Button
+          onClick={() => {
+            navigate("/login");
+          }}
+        >
+          Login
+        </Button>
+        <Button
+          onClick={() => {
+            navigate("/signup");
+          }}
+        >
+          Signup
         </Button>
       </Box>
       <Divider />

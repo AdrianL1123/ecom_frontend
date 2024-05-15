@@ -20,7 +20,7 @@ import {
   TextField,
 } from "@mui/material";
 import Header from "../../components/Header";
-import { displayCart } from "../../utils/api_cart";
+import { displayCart, emptyCart } from "../../utils/api_cart";
 import { addNewOrder } from "../../utils/api_orders";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -30,7 +30,6 @@ export default function Checkout() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const queryClient = useQueryClient();
 
   const { enqueueSnackbar } = useSnackbar();
   const { data: cart = [] } = useQuery({
@@ -40,8 +39,13 @@ export default function Checkout() {
 
   const addNewOrderMutation = useMutation({
     mutationFn: addNewOrder,
-    onSuccess: () => {
-      navigate("/orders");
+    onSuccess: (responseData) => {
+      // remove all the items from the cart
+      emptyCart();
+      // get the billplz url (responseData.billplz_url)
+      const billplz_url = responseData.billplz_url;
+      //redirect user to billplz payment page
+      window.location.href = billplz_url;
     },
     onError: (error) => {
       enqueueSnackbar(error.response.data.message, {
