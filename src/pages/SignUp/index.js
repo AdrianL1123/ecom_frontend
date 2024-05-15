@@ -42,8 +42,8 @@ export default function SignUp() {
   //handle mutation function here
   const handleSignUp = (e) => {
     if (confirmPassword !== password) {
-      enqueueSnackbar("Password is not matched !!", {
-        variant: "error",
+      enqueueSnackbar("Password does not match !!", {
+        variant: "warning",
       });
     } else {
       e.preventDefault();
