@@ -12,6 +12,10 @@ import {
   TableBody,
 } from "@mui/material";
 import Header from "../../components/Header";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 
 import {
   getCategories,
@@ -26,6 +30,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export default function Categories() {
+  const [openEditModal, setOpenEditModal] = useState(false);
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
   const [cookies] = useCookies(["currentUser"]);
@@ -33,6 +38,8 @@ export default function Categories() {
   const { role, token } = currentUser;
 
   const [name, setName] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editNameID, setEditNameID] = useState("");
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", token],
@@ -94,19 +101,47 @@ export default function Categories() {
     }
   };
 
+  const updateCategoryMutation = useMutation({
+    mutationFn: updateCategory,
+    onSuccess: () => {
+      // display success message
+      enqueueSnackbar("Category has been updated successfully.", {
+        variant: "success",
+      });
+      // reset the categories data
+      queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      });
+      // close modal
+      setOpenEditModal(false);
+    },
+    onError: (error) => {
+      // display error message
+      enqueueSnackbar(error.response.data.message, {
+        variant: "error",
+      });
+    },
+  });
+
   return (
     <>
       <Header />
-      <Container>
+      <Container style={{ paddingTop: "20px" }}>
         <Typography variant="h4">Categories</Typography>
-        <Divider />
         <Container
-          style={{ display: "flex", paddingTop: "20px", paddingBottom: "20px" }}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "10px",
+            padding: "20px",
+            marginBottom: "20px",
+          }}
         >
           <TextField
-            placeholder="Category Name"
+            label="Category Name"
             type="text"
             variant="outlined"
+            sx={{ width: "100%" }}
             fullWidth
             value={name}
             onChange={(e) => {
@@ -123,16 +158,27 @@ export default function Categories() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell align="left">Name</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell width={"70%"}>Name</TableCell>
+                  <TableCell align="left">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {categories.map((c) => (
                   <TableRow key={c._id}>
-                    <TableCell align="left">{c.name}</TableCell>
-                    <TableCell align="right">
-                      <Button variant="contained" color="primary">
+                    <TableCell width={"70%"}>{c.name}</TableCell>
+                    <TableCell align="left">
+                      <Button
+                        variant="contained"
+                        color="info"
+                        onClick={() => {
+                          // open the edit modal
+                          setOpenEditModal(true);
+                          // set the edit category field to its name as value
+                          setEditName(c.name);
+                          // set the edit category id so that we know wh
+                          setEditNameID(c._id);
+                        }}
+                      >
                         Edit
                       </Button>
                       <Button
@@ -157,6 +203,43 @@ export default function Categories() {
             </Typography>
           </Container>
         )}
+        <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
+          <DialogTitle>Edit Category</DialogTitle>
+          <DialogContent>
+            <TextField
+              placeholder="Category"
+              variant="outlined"
+              sx={{ width: "100%" }}
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => {
+                setOpenEditModal(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="success"
+              value={editName}
+              onClick={() => {
+                updateCategoryMutation.mutate({
+                  _id: editNameID,
+                  name: editName,
+                  token: token,
+                });
+              }}
+            >
+              Edit
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </>
   );

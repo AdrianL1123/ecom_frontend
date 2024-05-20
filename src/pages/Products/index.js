@@ -74,8 +74,8 @@ export default function Products() {
               <MenuItem value="all">All Categories</MenuItem>
               {categories.map((category) => {
                 return (
-                  <MenuItem key={category} value={category}>
-                    {category}
+                  <MenuItem key={category._id} value={category._id}>
+                    {category.name}
                   </MenuItem>
                 );
               })}

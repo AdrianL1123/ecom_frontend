@@ -108,7 +108,11 @@ export default function ProductsCard(props) {
                       sx={{ padding: "5px" }}
                       size="small"
                       style={{ backgroundColor: "#FFF4E6", color: "#FD882B" }}
-                      label={row.category}
+                      label={
+                        row.category && row.category.name
+                          ? row.category.name
+                          : ""
+                      }
                     ></Chip>
                   </CardActions>
                   <Typography variant="body2">

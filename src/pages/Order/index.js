@@ -89,8 +89,8 @@ export default function Orders() {
 
   return (
     <>
+      <Header />
       <Container align="center">
-        <Header />
         <TableContainer
           component={Paper}
           sx={{ maxWidth: "1200px", marginTop: "50px" }}

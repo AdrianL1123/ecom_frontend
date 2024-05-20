@@ -77,13 +77,15 @@ export default function Header() {
           >
             My Orders
           </Button>
-          <Button
-            onClick={() => {
-              navigate("/categories");
-            }}
-          >
-            Categories
-          </Button>
+          {currentUser && currentUser.role === "admin" ? (
+            <Button
+              onClick={() => {
+                navigate("/categories");
+              }}
+            >
+              Categories
+            </Button>
+          ) : null}
         </Box>
         {currentUser ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -99,6 +101,7 @@ export default function Header() {
             >
               Login
             </Button>
+
             <Button
               onClick={() => {
                 navigate("/signup");
