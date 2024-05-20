@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { enqueueSnackbar, useSnackbar } from "notistack";
+import { useCookies } from "react-cookie";
 import { getSignUp } from "../../utils/api_signup";
 
 export default function SignUp() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const [cookie, setCookie] = useCookies(["currentUser"]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,32 +27,33 @@ export default function SignUp() {
   const SignUpMutation = useMutation({
     mutationFn: getSignUp,
     onSuccess: (data) => {
-      // if API call is success, do what?
-      navigate("/login");
-      enqueueSnackbar("Sign Up Success, Now log in !!!", {
-        variant: "success",
+      setCookie("currentUser", data, {
+        maxAge: 60 * 60 * 24 * 30,
       });
-      console.log(data);
+      enqueueSnackbar("Successfully logged-in !", { variant: "success" });
+      // redirect to home page
+      navigate("/");
     },
     onError: (error) => {
-      // if API call is error, do what?
-      enqueueSnackbar(error.response.data.message, {
-        variant: "error",
-      });
+      enqueueSnackbar(error.response.data.message, { variant: "error" });
     },
   });
   //handle mutation function here
   const handleSignUp = (e) => {
-    if (confirmPassword !== password) {
+    if (name === "" || email === "" || password === "") {
+      enqueueSnackbar("Please fill in all details !", {
+        variant: "warning",
+      });
+    } else if (confirmPassword !== password) {
       enqueueSnackbar("Password does not match !!", {
         variant: "warning",
       });
     } else {
       e.preventDefault();
       SignUpMutation.mutate({
-        name: name,
-        email: email,
-        password: password,
+        name,
+        email,
+        password,
       });
     }
   };
@@ -92,7 +95,7 @@ export default function SignUp() {
                 <Typography>Password</Typography>
                 <TextField
                   placeholder="password"
-                  type="text"
+                  type="password"
                   variant="outlined"
                   fullWidth
                   value={password}
@@ -103,7 +106,7 @@ export default function SignUp() {
                 <Typography>Confirm Password</Typography>
                 <TextField
                   placeholder="confirm password"
-                  type="text"
+                  type="password"
                   variant="outlined"
                   fullWidth
                   value={confirmPassword}

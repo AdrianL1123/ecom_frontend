@@ -1,7 +1,12 @@
 import { Typography, Divider, Box, Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { emptyCart } from "../../utils/api_cart";
 
 export default function Header() {
+  const [cookies, removeCookie] = useCookies(["currentUser"]);
+  //* setCookies will not be used in header component thats why we dont need it
+  const { currentUser } = cookies;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -18,6 +23,15 @@ export default function Header() {
   } else if (location.pathname === "/signup") {
     pageTitle = "Create a New Account";
   }
+
+  const handleLogout = () => {
+    //* remove the currentUser cookie
+    removeCookie("currentUser");
+    //* empty the cart
+    emptyCart();
+    //* redirect back to home
+    navigate("/login");
+  };
 
   return (
     <>
@@ -37,45 +51,63 @@ export default function Header() {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           marginBottom: "20px",
         }}
       >
-        <Button
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          Home
-        </Button>
-        <Button
-          onClick={() => {
-            navigate("/cart");
-          }}
-        >
-          Cart
-        </Button>
-        <Button
-          onClick={() => {
-            navigate("/orders");
-          }}
-        >
-          My Orders
-        </Button>
-        <Button
-          onClick={() => {
-            navigate("/login");
-          }}
-        >
-          Login
-        </Button>
-        <Button
-          onClick={() => {
-            navigate("/signup");
-          }}
-        >
-          Signup
-        </Button>
+        <Box sx={{ display: "flex" }}>
+          <Button
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            Home
+          </Button>
+          <Button
+            onClick={() => {
+              navigate("/cart");
+            }}
+          >
+            Cart
+          </Button>
+          <Button
+            onClick={() => {
+              navigate("/orders");
+            }}
+          >
+            My Orders
+          </Button>
+          <Button
+            onClick={() => {
+              navigate("/categories");
+            }}
+          >
+            Categories
+          </Button>
+        </Box>
+        {currentUser ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>Current User: {currentUser.name}</span>
+            <Button onClick={handleLogout}>Log Out</Button>
+          </Box>
+        ) : (
+          <Box sx={{ display: "flex" }}>
+            <Button
+              onClick={() => {
+                navigate("/login");
+              }}
+            >
+              Login
+            </Button>
+            <Button
+              onClick={() => {
+                navigate("/signup");
+              }}
+            >
+              Signup
+            </Button>
+          </Box>
+        )}
       </Box>
       <Divider />
     </>

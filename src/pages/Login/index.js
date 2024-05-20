@@ -12,19 +12,24 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { enqueueSnackbar, useSnackbar } from "notistack";
+import { useCookies } from "react-cookie";
 import { getLogin } from "../../utils/api_login";
 
 export default function Login() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const [cookies, setCookie] = useCookies(["currentUser"]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   //mutation here
   const loginMutation = useMutation({
     mutationFn: getLogin,
-    onSuccess: () => {
-      // if API call is success, do what?
+    onSuccess: (data) => {
+      //* save current User data
+      setCookie("currentUser", data, { maxAge: 60 * 60 * 24 * 30 });
+      // 3600 = 1 hour in seconds
+      // 60 * 60 * 24 * 30 = 1 month
       navigate("/");
       enqueueSnackbar("Succesfully Logged In !", {
         variant: "success",
@@ -39,11 +44,17 @@ export default function Login() {
   });
   //handle mutation function here
   const handleLogin = (e) => {
-    e.preventDefault();
-    loginMutation.mutate({
-      email: email,
-      password: password,
-    });
+    if (email === "" || password === "") {
+      enqueueSnackbar("Please fill in the details", {
+        variant: "warning",
+      });
+    } else {
+      e.preventDefault();
+      loginMutation.mutate({
+        email: email,
+        password: password,
+      });
+    }
   };
 
   return (
@@ -68,7 +79,7 @@ export default function Login() {
                 <Typography>Password</Typography>
                 <TextField
                   placeholder="password"
-                  type="text"
+                  type="password"
                   variant="outlined"
                   fullWidth
                   value={password}

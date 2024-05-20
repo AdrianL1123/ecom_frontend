@@ -15,15 +15,19 @@ import {
   MenuItem,
 } from "@mui/material";
 import { getOrders, deleteOrder, updateOrder } from "../../utils/api_orders";
+import { useCookies } from "react-cookie";
 import Header from "../../components/Header";
 
 export default function Orders() {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
+  const [cookies] = useCookies(["currentUser"]);
+  const { currentUser = {} } = cookies;
+  const { role, token } = currentUser;
 
   const { data: orders = [] } = useQuery({
-    queryKey: ["order"],
-    queryFn: () => getOrders(),
+    queryKey: ["order", token],
+    queryFn: () => getOrders(token),
   });
 
   const deleteOrderMutation = useMutation({
@@ -50,7 +54,7 @@ export default function Orders() {
       "Are you sure you want to remove this order?"
     );
     if (answer) {
-      deleteOrderMutation.mutate(_id);
+      deleteOrderMutation.mutate({ _id: _id, token: token });
     }
   };
 
@@ -79,6 +83,7 @@ export default function Orders() {
     updateOrderMutation.mutate({
       ...order,
       status: status,
+      token: token,
     });
   };
 
@@ -112,8 +117,12 @@ export default function Orders() {
                     </TableCell>
 
                     <TableCell>
-                      {order.products.map((product) => (
-                        <Typography variant="p" display={"flex"}>
+                      {order.products.map((product, index) => (
+                        <Typography
+                          key={index}
+                          variant="body1"
+                          display={"flex"}
+                        >
                           {product.name} ({product.quantity})
                         </Typography>
                       ))}

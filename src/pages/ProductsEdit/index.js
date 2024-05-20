@@ -14,8 +14,12 @@ import {
 } from "@mui/material";
 import { getProduct, updateProduct } from "../../utils/api_products";
 import { uploadImage } from "../../utils/api_images";
+import { useCookies } from "react-cookie";
 
 export default function ProductsEdit() {
+  const [cookies] = useCookies(["currentUser"]);
+  const { currentUser = {} } = cookies;
+  const { token } = currentUser;
   const { id } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -74,6 +78,7 @@ export default function ProductsEdit() {
       price: price,
       category: category,
       image: image,
+      token: token,
     });
   };
 

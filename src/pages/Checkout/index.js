@@ -24,6 +24,7 @@ import { displayCart, emptyCart } from "../../utils/api_cart";
 import { addNewOrder } from "../../utils/api_orders";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useCookies } from "react-cookie";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -32,6 +33,10 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
 
   const { enqueueSnackbar } = useSnackbar();
+  const [cookies] = useCookies(["currentUser"]);
+  const { currentUser = {} } = cookies;
+  const { role, token } = currentUser;
+
   const { data: cart = [] } = useQuery({
     queryKey: ["cart"],
     queryFn: displayCart,
@@ -70,6 +75,7 @@ export default function Checkout() {
         customerEmail: email,
         products: cart,
         totalPrice: totalInCart(),
+        token: token,
       });
     }
   };
@@ -109,8 +115,9 @@ export default function Checkout() {
           <TextField
             placeholder="Name"
             variant="outlined"
+            disabled
             fullWidth
-            value={name}
+            value={currentUser.name}
             onChange={(e) => setName(e.target.value)}
           />
           <Typography sx={{ paddingTop: "30px" }}>Email *</Typography>
@@ -118,7 +125,8 @@ export default function Checkout() {
             placeholder="email address"
             variant="outlined"
             fullWidth
-            value={email}
+            disabled
+            value={currentUser.email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <Button
