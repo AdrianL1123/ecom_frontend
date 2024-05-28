@@ -1,5 +1,5 @@
 import axios from "axios";
-const url = "http://localhost:8888";
+import { url } from "./data";
 
 export const getOrders = async (token) => {
   const res = await axios.get(`${url}/orders`, {

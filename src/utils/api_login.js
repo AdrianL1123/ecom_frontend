@@ -1,5 +1,5 @@
 import axios from "axios";
-const url = "http://localhost:8888";
+import { url } from "./data";
 
 export const getLogin = async (data) => {
   const res = await axios.post(
